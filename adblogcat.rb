@@ -39,7 +39,7 @@ def printline(line, color, format)
 end
 
 def colorize(line)
-  color, format = case line[0]
+  color, format = case line[0..0]
                     when 'V', 'D', 'I'
                       [WHITE, NONE]
                     when 'W'
@@ -60,12 +60,12 @@ def error(msg)
 end
 
 def usage
-  error("Usage: #{$0} packageName [logcatOptions]")
+  error("Usage: #{$0} (-d|-e) packageName [logcatOptions]")
 end
 
 
-def get_pid(package_name)
-  output = `adb shell ps`.split("\r\n")
+def get_pid(device_or_emulator, package_name)
+  output = `adb #{device_or_emulator} shell ps`.split("\r\n")
 
   output.shift # header row
 
@@ -79,16 +79,24 @@ def get_pid(package_name)
 end
 
 def main
+  first_arg = ARGV.shift or usage
+
+  unless ['-d', '-e'].include?(first_arg)
+    error("Must pass -d or -e as the first arg to this method")
+  end
+
   package_name = ARGV.shift or usage
 
-  app_pid = get_pid(package_name)
+  app_pid = get_pid(first_arg, package_name)
 
   unless app_pid
     error("Unable to find running process with package named: #{package_name}")
   end
 
   # TODO: this won't work if an argument has a space in it. Can that happen?
-  cmd = "adb logcat -v brief #{ARGV.join(' ')}"
+  cmd = "adb #{first_arg} logcat -v brief #{ARGV.join(' ')}"
+
+  puts cmd
 
   PTY.spawn(cmd) do |stdin, stdout, pid|
     stdin.lines.each do |line|
