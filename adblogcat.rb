@@ -23,7 +23,7 @@ PID_COLUMN = 1
 NAME_COLUMN = 8
 
 # 'brief' log format
-LOG_FORMAT = /^\w\/\S+\s*\(\s*(\d+)\):/
+LOG_FORMAT = %r|^\w/.*\(\s*(\d+)\):|
 
 def escape n
   "\033[#{n}m" if STDOUT.tty?
