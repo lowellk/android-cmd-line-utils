@@ -106,4 +106,8 @@ def main
   end
 end
 
+%w( INT TERM ).each do |sig|
+  trap(sig) { exit }
+end
+
 main
